@@ -17,7 +17,9 @@ class ReviewFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'rating' => $this->faker->numberBetween(1, 5),
+            'title' => $this->faker->sentence(6),
+            'review' => $this->faker->paragraph(),
         ];
     }
 }

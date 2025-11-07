@@ -17,7 +17,12 @@ class MovieFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'title' => $this->faker->sentence(3),
+            'description' => $this->faker->paragraph(),
+            'release_date' => $this->faker->date(),
+            'director' => $this->faker->name(),
+            'poster_img_url' => $this->faker->imageUrl(200, 300, 'movies', true),
+            'cover_img_url' => $this->faker->imageUrl(800, 400, 'movies', true),
         ];
     }
 }
