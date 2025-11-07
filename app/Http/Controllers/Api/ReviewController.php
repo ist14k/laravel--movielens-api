@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-
-class ReviewController extends Controller
+class ReviewController extends ApiController
 {
     //
 }

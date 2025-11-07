@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 
-class RegistrationController extends Controller
+class RegistrationController extends ApiController
 {
     //
 }

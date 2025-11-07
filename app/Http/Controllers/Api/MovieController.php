@@ -2,9 +2,9 @@
 
 namespace App\Http\Controller\Api;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 
-class MovieController extends Controller
+class MovieController extends ApiController
 {
     //
 }
