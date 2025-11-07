@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Movie;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MovieController extends ApiController
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        $movies = Movie::paginate(10);
+        $movies = Movie::withAvg('reviews', 'rating')->paginate(10);
 
         return response()->json([
             'status' => 'success',
@@ -17,7 +18,7 @@ class MovieController extends ApiController
         ]);
     }
 
-    public function show(Movie $movie)
+    public function show(Movie $movie): JsonResponse
     {
         $movie->load('genres', 'reviews')->loadAvg('reviews', 'rating');
 
@@ -27,18 +28,30 @@ class MovieController extends ApiController
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'release_date' => 'required|date_format:Y-m-d', // postman data -> 2023-10-15
+            'release_date' => 'required|date_format:Y-m-d',
             'director' => 'nullable|string|max:255',
+            'genres' => 'nullable|array',
+            'genres.*' => 'integer|exists:genres,id',
         ]);
 
-        $movie = Movie::create(array_merge(
-            $validated, ['user_id' => $request->user()->id]
-        ));
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        $genreIds = $validated['genres'] ?? [];
+        unset($validated['genres']);
+
+        $movie = $user->movies()->create($validated);
+
+        if (! empty($genreIds)) {
+            $movie->genres()->attach($genreIds);
+        }
+
+        $movie->load('genres');
 
         return response()->json([
             'status' => 'success',
@@ -46,16 +59,27 @@ class MovieController extends ApiController
         ], 201);
     }
 
-    public function update(Request $request, Movie $movie)
+    public function update(Request $request, Movie $movie): JsonResponse
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'release_date' => 'required|date_format:Y-m-d', // postman data -> 2023-10-15
+            'release_date' => 'required|date_format:Y-m-d',
             'director' => 'nullable|string|max:255',
+            'genres' => 'nullable|array',
+            'genres.*' => 'integer|exists:genres,id',
         ]);
 
+        $genreIds = $validated['genres'] ?? [];
+        unset($validated['genres']);
+
         $movie->update($validated);
+
+        if ($request->has('genres')) {
+            $movie->genres()->sync($genreIds);
+        }
+
+        $movie->load('genres');
 
         return response()->json([
             'status' => 'success',
@@ -63,7 +87,7 @@ class MovieController extends ApiController
         ]);
     }
 
-    public function destroy(Movie $movie)
+    public function destroy(Movie $movie): JsonResponse
     {
         $movie->delete();
 
