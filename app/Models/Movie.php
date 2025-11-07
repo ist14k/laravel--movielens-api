@@ -23,6 +23,10 @@ class Movie extends Model
         'cover_img_url',
     ];
 
+    protected $hidden = [
+        'pivot',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

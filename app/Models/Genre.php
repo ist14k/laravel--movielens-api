@@ -16,6 +16,10 @@ class Genre extends Model
         'description',
     ];
 
+    protected $hidden = [
+        'pivot',
+    ];
+
     public function movies(): BelongsToMany
     {
         return $this->belongsToMany(Movie::class, 'movie_genre');
