@@ -19,11 +19,6 @@ class GenreController extends Controller
         ]);
     }
 
-    public function create()
-    {
-        //
-    }
-
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -39,8 +34,17 @@ class GenreController extends Controller
         ], 201);
     }
 
-    public function show(Genre $genre): JsonResponse
+    public function show(string $id): JsonResponse
     {
+        $genre = Genre::find($id);
+
+        if (! $genre) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Genre not found',
+            ], 404);
+        }
+
         $movies = $genre->movies()->paginate(12);
 
         return response()->json([
@@ -50,11 +54,6 @@ class GenreController extends Controller
                 'movies' => $movies,
             ],
         ]);
-    }
-
-    public function edit(Genre $genre)
-    {
-        //
     }
 
     public function update(Request $request, Genre $genre): JsonResponse

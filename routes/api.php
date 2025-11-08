@@ -32,7 +32,6 @@ Route::delete('/movies/{movie}/reviews/{review}', [ReviewController::class, 'des
 
 // genre routes
 Route::get('/genres', [GenreController::class, 'index']);
-Route::get('/genres/{genre}', [GenreController::class, 'show']);
+Route::get('/genres/{id}', [GenreController::class, 'show']);
 Route::post('/genres', [GenreController::class, 'store'])->middleware('auth:sanctum');
-Route::put('/genres/{genre}', [GenreController::class, 'update'])->middleware('auth:sanctum');
-Route::delete('/genres/{genre}', [GenreController::class, 'destroy'])->middleware('auth:sanctum');
+Route::put('/genres/{id}', [GenreController::class, 'update'])->middleware('auth:sanctum');

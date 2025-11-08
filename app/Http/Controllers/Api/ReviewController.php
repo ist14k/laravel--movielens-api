@@ -7,6 +7,7 @@ use App\Models\Movie;
 use App\Models\Review;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ReviewController extends Controller
 {
@@ -59,6 +60,15 @@ class ReviewController extends Controller
      */
     public function update(Request $request, Movie $movie, Review $review): JsonResponse
     {
+        $response = Gate::inspect('update', $review);
+
+        if (! $response->allowed()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You do not own this review.',
+            ], 403);
+        }
+
         if ($review->movie_id !== $movie->id) {
             return response()->json([
                 'status' => 'error',
@@ -85,6 +95,14 @@ class ReviewController extends Controller
      */
     public function destroy(Movie $movie, Review $review): JsonResponse
     {
+        $response = Gate::inspect('delete', $review);
+
+        if (! $response->allowed()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You do not own this review.',
+            ], 403);
+        }
         if ($review->movie_id !== $movie->id) {
             return response()->json([
                 'status' => 'error',

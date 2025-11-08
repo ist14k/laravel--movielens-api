@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Movie;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class MovieController extends ApiController
 {
+    use AuthorizesRequests;
+
     public function index(): JsonResponse
     {
         $movies = Movie::withAvg('reviews', 'rating')->paginate(10);
@@ -18,8 +22,17 @@ class MovieController extends ApiController
         ]);
     }
 
-    public function show(Movie $movie): JsonResponse
+    public function show(string $movie): JsonResponse
     {
+        $movie = Movie::find($movie);
+
+        if (! $movie) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Movie not found',
+            ], 404);
+        }
+
         $movie->load('genres', 'reviews')->loadAvg('reviews', 'rating');
 
         return response()->json([
@@ -61,6 +74,15 @@ class MovieController extends ApiController
 
     public function update(Request $request, Movie $movie): JsonResponse
     {
+        $response = Gate::inspect('update', $movie);
+
+        if (! $response->allowed()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You do not own this movie.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -89,6 +111,15 @@ class MovieController extends ApiController
 
     public function destroy(Movie $movie): JsonResponse
     {
+        $response = Gate::inspect('delete', $movie);
+
+        if (! $response->allowed()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You do not own this movie.',
+            ], 403);
+        }
+
         $movie->delete();
 
         return response()->json([
